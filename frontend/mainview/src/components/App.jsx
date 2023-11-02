@@ -50,6 +50,7 @@ export default function App() {
               </div>
               <div>
                 <button className="btn btn-primary">Cargar</button>
+                <button className="btn btn-success" style={{marginLeft: 10}}>Obtener resumen</button>
               </div>
             </div>
 
@@ -65,6 +66,7 @@ export default function App() {
               </div>
               <div>
                 <button className="btn btn-primary">Cargar</button>
+                <button className="btn btn-success" style={{marginLeft: 10}}>Obtener resumen</button>
               </div>
             </div>
           </div>
