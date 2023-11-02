@@ -49,7 +49,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <button className="btn btn-primary">Subir mensajes</button>
+                <button className="btn btn-primary">Cargar</button>
               </div>
             </div>
 
@@ -64,7 +64,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <button className="btn btn-primary">Subir configuración</button>
+                <button className="btn btn-primary">Cargar</button>
               </div>
             </div>
           </div>
