@@ -1,0 +1,4 @@
+# Proyecto 3
+- Luis Rodrigo Morales Florián
+- 202208521
+- LABORATORIO INTRODUCCION A LA PROGRAMACION Y COMPUTACION 2 Sección B
