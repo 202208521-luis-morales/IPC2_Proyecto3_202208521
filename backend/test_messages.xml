@@ -5,4 +5,12 @@
     <TEXTO> Bienvenido a USAC @estudiante01 @estudiante02, es un gusto que seas parte de esta
             institución #bienvenidaUSAC# </TEXTO>
   </MENSAJE>
+  <MENSAJE>
+    <FECHA> Guatemala, 15/01/2023 15:25 hrs. </FECHA>
+    <TEXTO> Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente, autem. @estudiante02, #texto#</TEXTO>
+  </MENSAJE>
+  <MENSAJE>
+    <FECHA> Guatemala, 17/01/2023 15:25 hrs. </FECHA>
+    <TEXTO>@estudiante01, #texto2# Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente, autem.</TEXTO>
+  </MENSAJE>
 </MENSAJES>
