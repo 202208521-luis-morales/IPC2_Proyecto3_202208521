@@ -290,7 +290,7 @@ export default function App() {
             <button className="btn btn-primary" onClick={onInfoStudentButtonClicked}>
               Información de estudiante
             </button>
-            <a href="https://github.com/202208521-luis-morales/IPC2_Proyecto3_202208521" target="_blank" rel="noopener noreferrer" className="btn btn-primary mx-3">
+            <a href="https://github.com/202208521-luis-morales/IPC2_Proyecto3_202208521/blob/main/Documentaci%C3%B3n/Documentaci%C3%B3n.pdf" target="_blank" rel="noopener noreferrer" className="btn btn-primary mx-3">
               Documentación del programa
             </a>
           </div>
