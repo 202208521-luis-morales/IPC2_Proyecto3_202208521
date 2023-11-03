@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import Chart from "chart.js/auto";
 import axios from 'axios';
-import pretty from 'pretty-format';
+import {format as prettyFormat} from 'pretty-format';
 
 export default function App() {
   const chartRef1 = useRef(null);
@@ -25,6 +25,7 @@ export default function App() {
       Swal.fire("Éxito", res.data, "success");
     }
   }
+
   const onMessageFileChange = (event) => {
     event.preventDefault();
     setMessagesFile(event.target.files[0]);
@@ -41,6 +42,15 @@ export default function App() {
   const onConfigFileChange = (event) => {
     event.preventDefault();
     setConfigFile(event.target.files[0]);
+  }
+
+  const onResetButtonClicked = async (event) => {
+    try {
+      let res = await axios.post('http://127.0.0.1:5000/reset');
+      processResponse(res);
+    } catch (error) {
+      processResponse(error, true);
+    }
   }
 
   const handleConfigFileUpload = async (event) => {
@@ -107,7 +117,7 @@ export default function App() {
     
     if(typeConsult !== "graphs") {
       setDataForGraphs({});
-      setTextConsultPanel(pretty.format(res.data, { min: true }));
+      setTextConsultPanel(prettyFormat(res.data));
     } else {
       setDataForGraphs(res);
     }
@@ -153,7 +163,7 @@ export default function App() {
           <div className="card-header">Opciones</div>
           <div className="card-body row">
             <div className="col">
-              <button className="btn btn-primary">Resetear datos</button>
+              <button onClick={onResetButtonClicked} className="btn btn-primary">Resetear datos</button>
             </div>
             <form onSubmit={(e) => handleMessageFileUpload(e)} className="col">
               <div className="form-group">

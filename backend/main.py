@@ -20,16 +20,23 @@ dbData = {
   }
 }
 
-@app.route("/reset")
+@app.route("/reset", methods=["POST"])
 def reset():
-    return "<p>Reset Works!</p>"
+    dbData["messages"] = []
+    dbData["dictionary"] = {
+        "positives": [],
+        "negatives": []
+    }
+    
+    return "Datos formateados correctamente", 200
+
 
 @app.route("/getConfig")
-def get_messages():
+def get_config():
     root = ET.Element("CONFIG_RECIBIDA")
-    ET.SubElement(root, "PALABRAS_POSITIVAS").text = dbData["dictionary"]["positives"]
+    ET.SubElement(root, "PALABRAS_POSITIVAS").text = str(len(dbData["dictionary"]["positives"]))
     ET.SubElement(root, "PALABRAS_POSITIVAS_RECHAZADAS").text = "0"
-    ET.SubElement(root, "PALABRAS_NEGATIVAS").text = dbData["dictionary"]["negatives"]
+    ET.SubElement(root, "PALABRAS_NEGATIVAS").text = str(len(dbData["dictionary"]["negatives"]))
     ET.SubElement(root, "PALABRAS_NEGATIVAS_RECHAZADAS").text = "0"
 
     xml_string = ET.tostring(root, encoding='utf8').decode('utf8')
@@ -46,18 +53,16 @@ def get_messages():
         texts = [message['text'] for message in message_group]
         result.append({'date': date, 'texts': texts})
 
-    print(result)
-
     root = ET.Element("MENSAJES_RECIBIDOS")
 
     for time in result:
         tiempo = ET.SubElement(root, "TIEMPO")
         texts = time["texts"]
 
-        ET.SubElement(tiempo, "FECHA").text = tiempo["date"]
-        ET.SubElement(tiempo, "MSJ_RECIBIDOS").text = len(texts)
-        ET.SubElement(tiempo, "USR_MENCIONADOS").text = encontrar_menciones(".".join(texts))
-        ET.SubElement(tiempo, "HASH_INCLUIDOS").text = encontrar_hashtags(".".join(texts))
+        ET.SubElement(tiempo, "FECHA").text = time["date"]
+        ET.SubElement(tiempo, "MSJ_RECIBIDOS").text = str(len(texts))
+        ET.SubElement(tiempo, "USR_MENCIONADOS").text = str(encontrar_menciones(".".join(texts)))
+        ET.SubElement(tiempo, "HASH_INCLUIDOS").text = str(encontrar_hashtags(".".join(texts)))
 
     xml_string = ET.tostring(root, encoding='utf8').decode('utf8')
     return Response(xml_string, content_type='application/xml')
@@ -78,8 +83,6 @@ def load_messages():
             if match:
                 fecha = match.group(0)
                 dbData["messages"].append({"date": fecha, "text": mensaje.find("TEXTO").text.strip()})
-
-                print(dbData)
             else:
                 return f'No se encontró ninguna fecha dentro del mensaje {indx}', 400
             
@@ -98,13 +101,9 @@ def load_config():
         for palabra in root.find("sentimientos_positivos").findall("palabra"):
             dbData["dictionary"]["positives"].append(palabra.text.strip())
 
-            print(dbData)
-
         for palabra in root.find("sentimientos_negativos").findall("palabra"):
             dbData["dictionary"]["negatives"].append(palabra.text.strip())
 
-            print(dbData)
-        
         return 'Archivo XML cargado y procesado exitosamente', 200
 
     return 'Sólo se aceptan archivos .xml', 400
@@ -124,8 +123,6 @@ def consult():
         texts = [message['text'] for message in message_group]
         result.append({'date': date, 'texts': texts})
 
-    print(result)
-
     if type_consult == "hashtags":
         return contar_hashtags(result, start_date, end_date), 200
     elif type_consult == "mentions":
@@ -140,9 +137,8 @@ def consult():
 def encontrar_menciones(texto):
     # Utiliza una expresión regular para encontrar menciones de usuarios
     menciones = re.findall(r'@[\wáéíóúÁÉÍÓÚüÜ]+', texto)
-    
     # Normaliza las menciones para no distinguir mayúsculas y acentos
-    menciones_normalizadas = [unidecode(mencion.lower()) for mencion in menciones]
+    menciones_normalizadas = [unidecode.unidecode(mencion.lower()) for mencion in menciones]
     
     # Utiliza un conjunto (set) para eliminar menciones duplicadas
     menciones_unicas = set(menciones_normalizadas)
@@ -152,21 +148,21 @@ def encontrar_menciones(texto):
 def encontrar_hashtags(texto):
     hashtags = re.findall(r'#(.*?)#', texto)
     
-    hashtags_normalizados = [unidecode(hashtag.lower()) for hashtag in hashtags]
+    hashtags_normalizados = [unidecode.unidecode(hashtag.lower()) for hashtag in hashtags]
 
     hashtags_unicos = set(hashtags_normalizados)
     
     return len(hashtags_unicos)
 
 def contar_hashtags(lista_datos, start_date, end_date):
-    return [{"date": ld["date"], "list": _contar_hashtags(".".join(ld["texts"]))} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%Y-%m-%d") <= datetime.strptime(end_date, "%Y-%m-%d")]
+    return [{"date": ld["date"], "list": _contar_hashtags(".".join(ld["texts"]))} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%d/%m/%Y") <= datetime.strptime(end_date, "%Y-%m-%d")]
 
 def _contar_hashtags(texto):
      # Utiliza una expresión regular para encontrar hashtags dentro de #...#
     hashtags = re.findall(r'#(.*?)#', texto)
     
     # Normaliza los hashtags para no distinguir mayúsculas, minúsculas y acentos
-    hashtags_normalizados = [unidecode(hashtag.lower()) for hashtag in hashtags]
+    hashtags_normalizados = [unidecode.unidecode(hashtag.lower()) for hashtag in hashtags]
     
     # Cuenta la frecuencia de cada hashtag
     conteo_hashtags = {}
@@ -176,7 +172,7 @@ def _contar_hashtags(texto):
     return conteo_hashtags
 
 def contar_sentimientos_palabras(lista_datos, start_date, end_date):
-    return [{"date": ld["date"], "list": _contar_sentimientos_palabras(ld["texts"])} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%Y-%m-%d") <= datetime.strptime(end_date, "%Y-%m-%d")]
+    return [{"date": ld["date"], "list": _contar_sentimientos_palabras(ld["texts"])} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%d/%m/%Y") <= datetime.strptime(end_date, "%Y-%m-%d")]
 
 def _contar_sentimientos_palabras(lista_textos):
     counter = {
@@ -208,15 +204,16 @@ def _contar_sentimientos_palabras(lista_textos):
     return counter
 
 def contar_menciones_usuarios(lista_datos, start_date, end_date):
-    return [{"date": ld["date"], "list": _contar_menciones_usuarios(".".join(ld["texts"]))} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%Y-%m-%d") <= datetime.strptime(end_date, "%Y-%m-%d")]
+    return [{"date": ld["date"], "list": _contar_menciones_usuarios(".".join(ld["texts"]))} for ld in lista_datos if datetime.strptime(start_date, "%Y-%m-%d") <= datetime.strptime(ld["date"], "%d/%m/%Y") <= datetime.strptime(end_date, "%Y-%m-%d")]
 
 def _contar_menciones_usuarios(texto):
     # Utiliza una expresión regular para encontrar menciones de usuarios
     menciones = re.findall(r'@[\wáéíóúÁÉÍÓÚüÜ]+', texto)
     
     # Normaliza las menciones para no distinguir mayúsculas, minúsculas y acentos
-    menciones_normalizadas = [unidecode(mencion.lower()) for mencion in menciones]
+    menciones_normalizadas = [unidecode.unidecode(mencion.lower()) for mencion in menciones]
     
+
     # Cuenta la frecuencia de cada mención de usuario
     conteo_menciones = {}
     for mencion in menciones_normalizadas:
